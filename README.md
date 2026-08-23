@@ -1,30 +1,7 @@
-# Elliot Qx V4 - Flat GitHub Deploy
+# Elliot Qx V4.3 - Validated Auth Build
 
-This package is deliberately flat. Upload every file in this folder directly to the root of the GitHub repository. No `src`, `public`, or `migrations` folders are required.
+This build fixes first-run bootstrap/login failures on Cloudflare Workers Free by replacing CPU-heavy PBKDF2 with a fast salted, server-peppered HMAC-SHA-256 credential verifier. The pepper is derived from the existing BOOTSTRAP_TOKEN secret, so no extra Cloudflare secret is required.
 
-## Expected GitHub root
+Existing D1 schema, DB binding `DB`, R2 binding `FILES`, and BOOTSTRAP_TOKEN remain unchanged. Upload the files in this package to the existing GitHub repository root.
 
-- index.js
-- index.html
-- app.js
-- styles.css
-- sw.js
-- manifest.webmanifest
-- qx.svg
-- package.json
-- wrangler.jsonc
-- 0001_initial.sql
-- 0002_worldclass.sql
-- 0003_elite.sql
-- 0004_market_leader.sql
-
-The Worker entry point is `index.js`. The UI assets are embedded into that Worker at build time in this package, so Cloudflare does not require an `assets.directory` folder.
-
-## Existing Cloudflare resources
-
-Qx expects:
-
-- D1 binding: `DB`, database name `elliot-qx-db`
-- R2 binding: `FILES`, bucket name `elliot-qx-files`
-
-After deployment succeeds, apply the four SQL files to the D1 database in order, then configure the `BOOTSTRAP_TOKEN` secret and create the first admin user.
+Validation performed before release: JavaScript syntax check, database schema migration check, crypto round-trip check, bootstrap INSERT/audit SQL check, login/session SQL check.

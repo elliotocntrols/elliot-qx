@@ -32,15 +32,23 @@ async function sha256(value) {
   const digest = await crypto.subtle.digest('SHA-256', typeof value === 'string' ? encoder.encode(value) : value);
   return toB64(new Uint8Array(digest));
 }
-async function hashPassword(password, salt = crypto.getRandomValues(new Uint8Array(16))) {
-  const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 20000, hash: 'SHA-256' }, key, 256);
-  return { salt: toB64(salt), hash: toB64(new Uint8Array(bits)) };
+async function authKey(env) {
+  if (!env.BOOTSTRAP_TOKEN) throw new Error('Authentication secret is not configured');
+  const seed = await crypto.subtle.digest('SHA-256', encoder.encode(`elliot-qx-auth-v1:${String(env.BOOTSTRAP_TOKEN)}`));
+  return crypto.subtle.importKey('raw', seed, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
 }
-async function verifyPassword(password, saltB64, expectedB64) {
-  const got = await hashPassword(password, fromB64(saltB64));
+async function hashPassword(password, env, salt = crypto.getRandomValues(new Uint8Array(16))) {
+  const key = await authKey(env);
+  const saltB64 = toB64(salt);
+  const payload = encoder.encode(`${saltB64} ${String(password)}`);
+  const mac = await crypto.subtle.sign('HMAC', key, payload);
+  return { salt: saltB64, hash: toB64(new Uint8Array(mac)), scheme: 'hmac-sha256-peppered-v1' };
+}
+async function verifyPassword(password, saltB64, expectedB64, env) {
+  const got = await hashPassword(password, env, fromB64(saltB64));
   const a = fromB64(got.hash), b = fromB64(expectedB64);
-  return a.length === b.length && crypto.subtle.timingSafeEqual(a, b);
+  if (a.length !== b.length) return false;
+  return crypto.subtle.timingSafeEqual(a, b);
 }
 function getCookie(request, name) {
   const raw = request.headers.get('cookie') || '';
@@ -66,7 +74,7 @@ async function refreshTurnover(env, packageId) {
 
 async function handleApi(request, env, ctx) {
   const url = new URL(request.url), path = url.pathname, method = request.method;
-  if (path === '/api/health') return json({ ok: true, app: env.APP_NAME, version: '4.2-free-plan-auth', time: now() });
+  if (path === '/api/health') return json({ ok: true, app: env.APP_NAME, version: '4.3-validated-auth', time: now() });
   if (path === '/api/setup/status' && method === 'GET') { const r = await env.DB.prepare('SELECT COUNT(*) count FROM users').first(); return json({ initialized: Number(r?.count || 0) > 0 }); }
   if (path === '/api/setup/bootstrap' && method === 'POST') {
     const c = await env.DB.prepare('SELECT COUNT(*) count FROM users').first(); if (Number(c?.count || 0) > 0) return json({ error: 'Already initialized' }, 409);
@@ -76,13 +84,13 @@ async function handleApi(request, env, ctx) {
     const expectedHash = await crypto.subtle.digest('SHA-256', encoder.encode(String(env.BOOTSTRAP_TOKEN)));
     if (!crypto.subtle.timingSafeEqual(suppliedHash, expectedHash)) return json({ error: 'Invalid bootstrap token' }, 403);
     if (!d.email || !d.name || String(d.password || '').length < 12) return json({ error: 'Name, email and password of at least 12 characters are required' }, 400);
-    const pw = await hashPassword(String(d.password)), uid = id('usr');
+    const pw = await hashPassword(String(d.password), env), uid = id('usr');
     await env.DB.prepare(`INSERT INTO users(id,email,name,role,password_salt,password_hash,active,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)`).bind(uid, clean(d.email, 200).toLowerCase(), clean(d.name, 120), 'admin', pw.salt, pw.hash, 1, now(), now()).run();
     await audit(env, uid, 'bootstrap_admin', 'user', uid); return json({ ok: true }, 201);
   }
   if (path === '/api/auth/login' && method === 'POST') {
     const d = await bodyJson(request); const u = await env.DB.prepare('SELECT * FROM users WHERE email=? AND active=1 LIMIT 1').bind(clean(d.email, 200).toLowerCase()).first();
-    if (!u || !(await verifyPassword(String(d.password || ''), u.password_salt, u.password_hash))) return json({ error: 'Invalid email or password' }, 401);
+    if (!u || !(await verifyPassword(String(d.password || ''), u.password_salt, u.password_hash, env))) return json({ error: 'Invalid email or password' }, 401);
     const token = toB64(crypto.getRandomValues(new Uint8Array(32))).replaceAll('+','-').replaceAll('/','_').replaceAll('=',''), expires = new Date(Date.now()+43200000).toISOString();
     await env.DB.prepare('INSERT INTO sessions(id,user_id,token_hash,expires_at,created_at) VALUES(?,?,?,?,?)').bind(id('ses'), u.id, await sha256(token), expires, now()).run();
     ctx.waitUntil(audit(env, u.id, 'login', 'user', u.id)); return json({ user: { id:u.id,email:u.email,name:u.name,role:u.role } }, 200, { 'set-cookie': cookie(token) });
@@ -153,7 +161,7 @@ async function handleApi(request, env, ctx) {
   if (path === '/api/witness' && method === 'POST') { const d=await bodyJson(request); if(!d.project_id||!d.requested_for)return json({error:'Project and requested date/time required'},400); const wid=id('wit'); await env.DB.prepare(`INSERT INTO witness_requests(id,project_id,inspection_id,system_id,requested_for,witness_party,status,created_by,created_at,updated_at) VALUES(?,?,?,?,?,?,'requested',?,?,?)`).bind(wid,d.project_id,nullable(d.inspection_id,100),nullable(d.system_id,100),clean(d.requested_for,40),nullable(d.witness_party,180),user.id,now(),now()).run(); return json({id:wid},201); }
 
   if (path === '/api/users' && method === 'GET') { const rows=await all(env.DB.prepare(`SELECT id,email,name,role,active,created_at FROM users ORDER BY name`)); return json({users:rows}); }
-  if (path === '/api/users' && method === 'POST') { if(!roleAllowed(user,['admin']))return json({error:'Admin only'},403); const d=await bodyJson(request); if(!d.email||!d.name||String(d.password||'').length<12)return json({error:'Name, email and 12+ character password required'},400); const pw=await hashPassword(String(d.password)), uid=id('usr'); await env.DB.prepare(`INSERT INTO users(id,email,name,role,password_salt,password_hash,active,created_at,updated_at) VALUES(?,?,?,?,?,?,1,?,?)`).bind(uid,clean(d.email,200).toLowerCase(),clean(d.name,120),clean(d.role||'technician',30),pw.salt,pw.hash,now(),now()).run(); return json({id:uid},201); }
+  if (path === '/api/users' && method === 'POST') { if(!roleAllowed(user,['admin']))return json({error:'Admin only'},403); const d=await bodyJson(request); if(!d.email||!d.name||String(d.password||'').length<12)return json({error:'Name, email and 12+ character password required'},400); const pw=await hashPassword(String(d.password), env), uid=id('usr'); await env.DB.prepare(`INSERT INTO users(id,email,name,role,password_salt,password_hash,active,created_at,updated_at) VALUES(?,?,?,?,?,?,1,?,?)`).bind(uid,clean(d.email,200).toLowerCase(),clean(d.name,120),clean(d.role||'technician',30),pw.salt,pw.hash,now(),now()).run(); return json({id:uid},201); }
 
   if (path === '/api/files' && method === 'POST') { const projectId=url.searchParams.get('project_id'); if(!projectId)return json({error:'project_id required'},400); const fileName=clean(request.headers.get('x-file-name')||'evidence.bin',240), contentType=request.headers.get('content-type')||'application/octet-stream'; if(request.body===null)return json({error:'File body required'},400); const key=`${projectId}/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}-${fileName.replace(/[^a-zA-Z0-9._-]/g,'_')}`; const obj=await env.FILES.put(key,request.body,{httpMetadata:{contentType},customMetadata:{uploadedBy:user.id}}); const fid=id('file'); await env.DB.prepare(`INSERT INTO files(id,project_id,equipment_id,inspection_id,defect_id,object_key,file_name,content_type,size_bytes,uploaded_by,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?)`).bind(fid,projectId,nullable(url.searchParams.get('equipment_id'),100),nullable(url.searchParams.get('inspection_id'),100),nullable(url.searchParams.get('defect_id'),100),key,fileName,contentType,Number(obj?.size||0),user.id,now()).run(); return json({id:fid,file_name:fileName},201); }
   const fileMatch=path.match(/^\/api\/files\/([^/]+)$/); if(fileMatch&&method==='GET'){ const f=await env.DB.prepare('SELECT * FROM files WHERE id=?').bind(fileMatch[1]).first(); if(!f)return json({error:'Not found'},404); const o=await env.FILES.get(f.object_key); if(!o)return json({error:'Object missing'},404); const h=new Headers(); o.writeHttpMetadata(h); h.set('etag',o.httpEtag); h.set('content-disposition',`inline; filename="${f.file_name.replaceAll('"','')}"`); return new Response(o.body,{headers:h}); }
