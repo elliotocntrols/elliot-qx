@@ -1,0 +1,17 @@
+ELLIOT QX - FOOLPROOF GITHUB UPLOAD
+
+Upload ALL files and folders in this package to the ROOT of the GitHub repository.
+The Worker entry file is now index.js at the repository root.
+Cloudflare no longer depends on src/index.js for deployment.
+
+Your GitHub root must visibly show:
+  index.js
+  wrangler.jsonc
+  package.json
+  public/
+  migrations/
+
+IMPORTANT:
+The wrangler.jsonc still contains REPLACE_WITH_D1_DATABASE_ID.
+Before final production deployment, replace it with your real Cloudflare D1 database ID.
+Your R2 bucket name is already set to elliot-qx-files.
