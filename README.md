@@ -1,3 +1,16 @@
+# Elliot Qx V8.3 — Light Workspace + Modal Fix
+
+This patch preserves the V8.1/V8.2 functionality and working authentication/backend.
+
+Changes:
+- Keeps the left navigation dark navy.
+- Forces the entire main workspace, cards, tables, forms and modals to white/light grey.
+- Replaces modal Close text button with a reliable X button.
+- Modals close with X, Escape, or clicking the backdrop.
+- Bumps the PWA/service-worker cache and cache-busts CSS/JS so the old dark theme is not reused.
+
+Deployment: upload all files to the same GitHub repository root and replace existing files. Do not change D1, R2 or Cloudflare bindings.
+
 # Elliot Qx V8 — Head-to-Head Edition
 
 Built on the verified V4.5/V7 production foundation. V8 targets the strongest market capabilities while retaining Elliot-specific BMS/electrical depth.
