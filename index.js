@@ -34,7 +34,7 @@ async function sha256(value) {
 }
 async function hashPassword(password, salt = crypto.getRandomValues(new Uint8Array(16))) {
   const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 240000, hash: 'SHA-256' }, key, 256);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 20000, hash: 'SHA-256' }, key, 256);
   return { salt: toB64(salt), hash: toB64(new Uint8Array(bits)) };
 }
 async function verifyPassword(password, saltB64, expectedB64) {
@@ -66,13 +66,15 @@ async function refreshTurnover(env, packageId) {
 
 async function handleApi(request, env, ctx) {
   const url = new URL(request.url), path = url.pathname, method = request.method;
-  if (path === '/api/health') return json({ ok: true, app: env.APP_NAME, version: '4.1-auth-fix', time: now() });
+  if (path === '/api/health') return json({ ok: true, app: env.APP_NAME, version: '4.2-free-plan-auth', time: now() });
   if (path === '/api/setup/status' && method === 'GET') { const r = await env.DB.prepare('SELECT COUNT(*) count FROM users').first(); return json({ initialized: Number(r?.count || 0) > 0 }); }
   if (path === '/api/setup/bootstrap' && method === 'POST') {
     const c = await env.DB.prepare('SELECT COUNT(*) count FROM users').first(); if (Number(c?.count || 0) > 0) return json({ error: 'Already initialized' }, 409);
     if (!env.BOOTSTRAP_TOKEN) return json({ error: 'BOOTSTRAP_TOKEN is not configured' }, 503);
-    const d = await bodyJson(request), supplied = encoder.encode(clean(d.token, 200)), expected = encoder.encode(String(env.BOOTSTRAP_TOKEN));
-    if (supplied.length !== expected.length || !crypto.subtle.timingSafeEqual(supplied, expected)) return json({ error: 'Invalid bootstrap token' }, 403);
+    const d = await bodyJson(request);
+    const suppliedHash = await crypto.subtle.digest('SHA-256', encoder.encode(clean(d.token, 200)));
+    const expectedHash = await crypto.subtle.digest('SHA-256', encoder.encode(String(env.BOOTSTRAP_TOKEN)));
+    if (!crypto.subtle.timingSafeEqual(suppliedHash, expectedHash)) return json({ error: 'Invalid bootstrap token' }, 403);
     if (!d.email || !d.name || String(d.password || '').length < 12) return json({ error: 'Name, email and password of at least 12 characters are required' }, 400);
     const pw = await hashPassword(String(d.password)), uid = id('usr');
     await env.DB.prepare(`INSERT INTO users(id,email,name,role,password_salt,password_hash,active,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?)`).bind(uid, clean(d.email, 200).toLowerCase(), clean(d.name, 120), 'admin', pw.salt, pw.hash, 1, now(), now()).run();
