@@ -1,4 +1,4 @@
-const CACHE='elliot-qx-v4.1-shell';
+const CACHE='elliot-qx-v8-head-to-head-shell';
 const SHELL=['/','/index.html','/styles.css','/app.js','/manifest.webmanifest','/icons/qx.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

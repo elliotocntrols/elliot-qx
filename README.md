@@ -1,13 +1,19 @@
-# Elliot Qx V4.5 - First Admin Verified
+# Elliot Qx V8 — Head-to-Head Edition
 
-This build removes the Cloudflare `BOOTSTRAP_TOKEN` dependency from first-run setup.
+Built on the verified V4.5/V7 production foundation. V8 targets the strongest market capabilities while retaining Elliot-specific BMS/electrical depth.
 
-First-run behavior:
-- If the `users` table is empty, Qx allows creation of the first administrator.
-- The same request creates the authenticated session and returns the signed-in user.
-- As soon as one user exists, the bootstrap endpoint permanently returns `Already initialized`.
-- Existing D1 (`DB`) and R2 (`FILES`) bindings remain unchanged.
+## V8 additions
+- Portfolio Control Tower with cross-project readiness/risk.
+- Field Hub with large touch workflows and downloadable offline project packs.
+- Conflict-aware sync v2 backend for equipment, defects and BMS points.
+- Asset readiness engine with explicit blockers.
+- Smart Template Builder for project-specific ITP/PFC/FPT drafts.
+- Field Observations / design & construction review register.
+- Commissioning Plan and milestone gates.
+- Existing V7 drawings/markups, alerts, client share, handover dossier, signature, evidence, BMS I/O and completion matrix retained.
 
-Deployment: upload all files in this package to the root of the existing GitHub repository and allow Cloudflare to redeploy. The old `BOOTSTRAP_TOKEN` secret may remain in Cloudflare; this build ignores it.
+## Deploy
+Upload the root files to the existing GitHub repository and replace previous versions. Do not change D1, R2, bindings or the administrator account. V8 extension tables self-initialize after login.
 
-Validated locally against the four Qx migrations: setup status, first admin creation, session authentication, second-bootstrap rejection, logout, successful login, and incorrect-password rejection all passed.
+## Important
+Machine-generated commissioning procedures are drafts only. Approved project documents, statutory requirements, manufacturer instructions and competent engineering judgement remain authoritative.

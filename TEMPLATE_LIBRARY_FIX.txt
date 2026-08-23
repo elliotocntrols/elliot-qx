@@ -1,0 +1,17 @@
+Elliot Qx V8.1 - Template Library Fix
+
+Template Library is now fully functional.
+
+Added:
+- Open any template and see every check/hold point
+- Create new templates
+- Edit template details
+- Add/edit/delete unused template checks
+- Prevent deletion of checks already used in historical test records
+- Duplicate templates before making major revisions
+- Archive templates without affecting old commissioning records
+- Start a project test directly from a template
+- Role controls for Admin / PM / Engineer edits
+
+No D1 migration, R2 change, login change or Cloudflare setting change is required.
+Upload/replace the files in the same GitHub repository root.

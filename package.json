@@ -1,9 +1,9 @@
 {
   "name": "elliot-qx-commissioning-os",
-  "version": "3.0.0",
+  "version": "8.1.0",
   "private": true,
   "type": "module",
-  "description": "Elliot Qx Elite - commissioning operating system for electrical, BMS and systems completion",
+  "description": "Elliot Qx V8.1 - template library fix commissioning OS",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",

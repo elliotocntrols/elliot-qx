@@ -1,0 +1,16 @@
+ELLIOT QX V8.2 - LIGHT ESTIMATOR THEME
+
+This build keeps all V8.1 functions and the repaired Template Library unchanged.
+Visual changes only:
+- Light grey application workspace
+- White cards and tables
+- Dark navy left navigation
+- Elliot orange primary buttons and active accents
+- Lighter forms/modals
+- Cleaner KPI cards and project tiles
+- Light field hub and completion screens
+- Updated mobile/PWA theme colours
+
+Deployment:
+Upload all files in this ZIP to the same GitHub repository root and replace existing files.
+Do not change Cloudflare, D1, R2, bindings or account settings.
