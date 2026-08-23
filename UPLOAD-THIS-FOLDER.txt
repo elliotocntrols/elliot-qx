@@ -1,0 +1,16 @@
+ELLIOT QX - DEPLOY READY PACKAGE
+
+Upload ALL files and folders in this directory to the ROOT of your GitHub repository.
+
+The repository root must contain:
+- src/index.js
+- public/
+- migrations/
+- package.json
+- wrangler.jsonc
+- README.md
+
+IMPORTANT:
+The Worker entry point is src/index.js.
+Do not upload only the public folder.
+Do not place the whole project inside another nested folder in GitHub.
