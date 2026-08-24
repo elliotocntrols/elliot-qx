@@ -1,32 +1,12 @@
-# Elliot Qx V8.3 — Light Workspace + Modal Fix
+# Elliot Qx V8.4 - Definitive Light Workspace
 
-This patch preserves the V8.1/V8.2 functionality and working authentication/backend.
+This package fixes the deployment architecture issue that caused the app to stay dark: the Cloudflare Worker was serving embedded V6/V8.1 static CSS/JS instead of the uploaded standalone files. V8.4 re-embeds the current app, CSS, service worker, manifest and HTML directly inside index.js.
 
-Changes:
-- Keeps the left navigation dark navy.
-- Forces the entire main workspace, cards, tables, forms and modals to white/light grey.
-- Replaces modal Close text button with a reliable X button.
-- Modals close with X, Escape, or clicking the backdrop.
-- Bumps the PWA/service-worker cache and cache-busts CSS/JS so the old dark theme is not reused.
+- Navy left navigation retained
+- Main workspace forced white/light grey
+- White cards, tables, forms and modals
+- Orange Elliot action accent
+- Template Library modal closes via X, Escape or backdrop click
+- Existing DB/R2/auth preserved
 
-Deployment: upload all files to the same GitHub repository root and replace existing files. Do not change D1, R2 or Cloudflare bindings.
-
-# Elliot Qx V8 — Head-to-Head Edition
-
-Built on the verified V4.5/V7 production foundation. V8 targets the strongest market capabilities while retaining Elliot-specific BMS/electrical depth.
-
-## V8 additions
-- Portfolio Control Tower with cross-project readiness/risk.
-- Field Hub with large touch workflows and downloadable offline project packs.
-- Conflict-aware sync v2 backend for equipment, defects and BMS points.
-- Asset readiness engine with explicit blockers.
-- Smart Template Builder for project-specific ITP/PFC/FPT drafts.
-- Field Observations / design & construction review register.
-- Commissioning Plan and milestone gates.
-- Existing V7 drawings/markups, alerts, client share, handover dossier, signature, evidence, BMS I/O and completion matrix retained.
-
-## Deploy
-Upload the root files to the existing GitHub repository and replace previous versions. Do not change D1, R2, bindings or the administrator account. V8 extension tables self-initialize after login.
-
-## Important
-Machine-generated commissioning procedures are drafts only. Approved project documents, statutory requirements, manufacturer instructions and competent engineering judgement remain authoritative.
+Deploy by replacing the repository root files. Do not change Cloudflare bindings or D1/R2.
