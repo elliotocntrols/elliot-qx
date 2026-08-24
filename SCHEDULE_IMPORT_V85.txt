@@ -1,0 +1,7 @@
+Qx V8.5 Schedule Importer
+- PDF, XLSX, XLS and CSV import
+- Auto-detect BMS points list vs MSSB schedule
+- Preview before commit
+- BMS points + controller commissioning sheets
+- MSSB assets + board/circuit commissioning sheets
+- Source uploaded to R2 after successful generation

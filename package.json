@@ -1,9 +1,9 @@
 {
   "name": "elliot-qx-commissioning-os",
-  "version": "8.1.0",
+  "version": "8.5.0",
   "private": true,
   "type": "module",
-  "description": "Elliot Qx V8.1 - template library fix commissioning OS",
+  "description": "Elliot Qx V8.5 - PDF/Excel schedule import and auto commissioning builder",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
