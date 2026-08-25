@@ -1,0 +1,6 @@
+controller,point_name,point_type,io_address,cable_number,terminal,field_device,engineering_units,normal_state,equipment_tag,system
+JACE-DEMO,AHU-DEMO-01 Supply Air Temp,AI,UI1,BMS-001,X1:1,Duct temperature sensor,degC,,AHU-DEMO-01,AHU
+JACE-DEMO,AHU-DEMO-01 Fan Enable,DO,UO1,BMS-002,X1:2,VSD enable,,OFF,AHU-DEMO-01,AHU
+JACE-DEMO,AHU-DEMO-01 Fan Status,DI,UI2,BMS-003,X1:3,VSD run status,,OFF,AHU-DEMO-01,AHU
+JACE-DEMO,AHU-DEMO-01 Speed Command,AO,UO2,BMS-004,X1:4,VSD speed reference,%,0,AHU-DEMO-01,AHU
+JACE-DEMO,AHU-DEMO-01 Filter Alarm,DI,UI3,BMS-005,X1:5,Differential pressure switch,,NORMAL,AHU-DEMO-01,AHU

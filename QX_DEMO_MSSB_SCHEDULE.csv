@@ -1,0 +1,6 @@
+board,circuit,description,rating,phase,cable,control,bms,location
+MSSB-DEMO,1,AHU-DEMO-01 Supply Fan,20A,3P,4C+E 4mm2,VSD,Enable/Status/Speed,Plantroom
+MSSB-DEMO,2,CHWP-DEMO-01,16A,3P,4C+E 2.5mm2,DOL,Start/Status/Fault,Plantroom
+MSSB-DEMO,3,CHWP-DEMO-02,16A,3P,4C+E 2.5mm2,DOL,Start/Status/Fault,Plantroom
+MSSB-DEMO,4,BMS Panel Supply,10A,1P,2C+E 2.5mm2,Isolator,Power Fail,Plantroom
+MSSB-DEMO,5,Mechanical Meter,10A,1P,2C+E 2.5mm2,Isolator,Modbus,Plantroom

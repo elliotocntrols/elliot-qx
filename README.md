@@ -1,8 +1,8 @@
-# Elliot Qx V8.5 - Schedule Import & Auto-Commissioning Builder
+# Elliot Qx V8.6 - Schedule Import & Auto-Commissioning Builder
 
 Built on the working V8.4 light workspace/authentication baseline.
 
-## New in V8.5
+## New in V8.6
 
 - New **Schedule Importer** in the Project navigation.
 - Import **PDF, XLSX, XLS or CSV**.
@@ -30,3 +30,14 @@ No database migration is required.
 ## Notes
 
 Excel and PDF parsing libraries are loaded on demand in the browser when Schedule Importer is used. CSV import is fully local. PDF extraction works best with text-based schedule PDFs; scanned image-only PDFs are not OCR'd in this release.
+
+## V8.6 Demo & Team Rollout
+
+- New **Demo Centre** in the Command navigation.
+- One-click `QX-DEMO` project seed (idempotent; it will not create duplicates).
+- Demo project includes two systems, AHU + MSSB assets, sample BMS I/O states, a Category A defect, witness request, turnover package and an in-progress QA/commissioning sheet.
+- Built-in downloads for sample BMS points and MSSB schedule CSVs.
+- In-app 30-minute runbook and 4-week team implementation plan.
+- Additional package files: `DEMO_RUNBOOK.md`, `TEAM_IMPLEMENTATION_GUIDE.md`, `QX_DEMO_BMS_POINTS.csv`, `QX_DEMO_MSSB_SCHEDULE.csv`.
+
+No D1 migration or Cloudflare binding change is required.
